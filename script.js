@@ -154,3 +154,14 @@ if (qTrack) {
   if (prev) prev.addEventListener("click", () => qTrack.scrollBy({ left: -step(), behavior: "smooth" }));
   if (next) next.addEventListener("click", () => qTrack.scrollBy({ left: step(), behavior: "smooth" }));
 }
+
+// Scroll progress bar + back-to-top visibility
+const progressBar = document.querySelector(".scroll-progress");
+const toTop = document.querySelector(".to-top");
+const onProgress = () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  if (progressBar && max > 0) progressBar.style.width = (window.scrollY / max) * 100 + "%";
+  if (toTop) toTop.classList.toggle("show", window.scrollY > 600);
+};
+window.addEventListener("scroll", onProgress, { passive: true });
+onProgress();

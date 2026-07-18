@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0f12"/>
+      <stop offset="1" stop-color="#121b16"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <circle cx="120" cy="90" r="200" fill="#6dcb4e" opacity="0.05"/>
+
+  <g font-family="monospace" font-size="22">
+    <path d="M180 100 L620 100 L540 190 L260 190 Z" fill="#6dcb4e"/>
+    <text x="400" y="155" text-anchor="middle" fill="#0b0f12">impressions</text>
+    <path d="M270 210 L530 210 L480 300 L320 300 Z" fill="#4a7a3c"/>
+    <text x="400" y="265" text-anchor="middle" fill="#dfeee0">clicks</text>
+    <path d="M330 320 L470 320 L440 400 L360 400 Z" fill="#31513a"/>
+    <text x="400" y="370" text-anchor="middle" fill="#9db3a6">buys</text>
+  </g>
+  <path d="M600 260 l0 -34 24 24 -14 2 8 18 -10 4 -8 -18 z" fill="#f2f5f3"/>
+  <text x="60" y="452" font-family="monospace" font-size="24" fill="#5c6a63">CTR · CPC · campaign ROI</text>
+</svg>

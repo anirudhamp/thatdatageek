@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0f12"/>
+      <stop offset="1" stop-color="#121b16"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <circle cx="700" cy="80" r="200" fill="#6dcb4e" opacity="0.05"/>
+
+  <g stroke="#22302a" stroke-width="2"><line x1="90" y1="80" x2="90" y2="390"/><line x1="90" y1="390" x2="740" y2="390"/></g>
+  <g stroke="#161d21" stroke-width="1"><line x1="90" y1="160" x2="740" y2="160"/><line x1="90" y1="240" x2="740" y2="240"/><line x1="90" y1="320" x2="740" y2="320"/></g>
+  <path d="M470 262 L560 210 Q650 175 730 195 L730 320 Q650 260 560 300 L470 330 Z" fill="#6dcb4e" opacity="0.12"/>
+  <path d="M110 340 L180 300 L250 325 L320 250 L400 285 L470 295" fill="none" stroke="#9db3a6" stroke-width="6" stroke-linecap="round"/>
+  <path d="M470 295 L560 255 Q650 218 730 255" fill="none" stroke="#6dcb4e" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 16"/>
+  <line x1="470" y1="90" x2="470" y2="390" stroke="#6dcb4e" stroke-width="2" stroke-dasharray="6 8" opacity="0.5"/>
+  <text x="486" y="112" font-family="monospace" font-size="20" fill="#6dcb4e">t+7</text>
+  <text x="60" y="452" font-family="monospace" font-size="24" fill="#5c6a63">ARIMA(p,d,q) · 7-day forecast</text>
+</svg>

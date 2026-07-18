@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <linearGradient id="bgk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0f12"/>
+      <stop offset="1" stop-color="#121b16"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bgk)"/>
+  <circle cx="660" cy="120" r="240" fill="#6dcb4e" opacity="0.05"/>
+  <circle cx="130" cy="690" r="200" fill="#6dcb4e" opacity="0.04"/>
+
+  <!-- faint chart backdrop -->
+  <g opacity="0.35">
+    <g stroke="#22302a" stroke-width="2"><line x1="120" y1="120" x2="120" y2="330"/><line x1="120" y1="330" x2="680" y2="330"/></g>
+    <path d="M135 305 L230 265 L320 285 L420 225 L500 245" fill="none" stroke="#3f5a49" stroke-width="6" stroke-linecap="round"/>
+    <path d="M500 245 L590 205 Q650 180 678 190" fill="none" stroke="#6dcb4e" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 14"/>
+  </g>
+
+  <!-- laurel wreath in brand green -->
+  <g stroke="#4a7a3c" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M180 300 Q140 420 180 540"/>
+    <path d="M620 300 Q660 420 620 540"/>
+  </g>
+  <g fill="#4a7a3c">
+    <ellipse cx="168" cy="330" rx="26" ry="10" transform="rotate(-40 168 330)"/>
+    <ellipse cx="152" cy="395" rx="26" ry="10" transform="rotate(-15 152 395)"/>
+    <ellipse cx="150" cy="460" rx="26" ry="10" transform="rotate(10 150 460)"/>
+    <ellipse cx="168" cy="522" rx="26" ry="10" transform="rotate(35 168 522)"/>
+    <ellipse cx="632" cy="330" rx="26" ry="10" transform="rotate(40 632 330)"/>
+    <ellipse cx="648" cy="395" rx="26" ry="10" transform="rotate(15 648 395)"/>
+    <ellipse cx="650" cy="460" rx="26" ry="10" transform="rotate(-10 650 460)"/>
+    <ellipse cx="632" cy="522" rx="26" ry="10" transform="rotate(-35 632 522)"/>
+  </g>
+
+  <!-- plaque with the exact talk name -->
+  <rect x="190" y="330" width="420" height="210" rx="10" fill="#0b0f12" stroke="#6dcb4e" stroke-width="3"/>
+  <rect x="202" y="342" width="396" height="186" rx="6" fill="none" stroke="#31513a" stroke-width="2"/>
+  <text x="400" y="405" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="38" letter-spacing="4" fill="#f2f5f3">DATA SCIENCE</text>
+  <text x="400" y="452" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="38" letter-spacing="4" fill="#f2f5f3">FORECASTING</text>
+  <text x="400" y="490" text-anchor="middle" font-family="monospace" font-size="17.5" letter-spacing="2" fill="#6dcb4e">MACHINE LEARNING INNOVATION SUMMIT</text>
+  <text x="400" y="516" text-anchor="middle" font-family="monospace" font-size="17" letter-spacing="3" fill="#9db3a6">DUBLIN, IRELAND · 2018</text>
+
+  <text x="120" y="756" font-family="monospace" font-size="26" fill="#5c6a63">keynote · 45 min · slides available</text>
+</svg>
