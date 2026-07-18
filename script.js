@@ -1,0 +1,127 @@
+// ============ That Data Geek — interactions ============
+
+// Current year in footer
+const yearEl = document.getElementById("year");
+if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+// Nav background border on scroll
+const nav = document.querySelector(".nav");
+const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
+window.addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+
+// Mobile menu
+const toggle = document.querySelector(".nav-toggle");
+const links = document.querySelector(".nav-links");
+if (toggle && links) {
+  toggle.addEventListener("click", () => {
+    const open = links.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", String(open));
+  });
+  links.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    })
+  );
+}
+
+// Build skill diamonds (5 per row, filled to data-level)
+document.querySelectorAll(".skill").forEach((row) => {
+  const level = parseInt(row.dataset.level || "0", 10);
+  const holder = row.querySelector(".skill-diamonds");
+  if (!holder) return;
+  for (let i = 1; i <= 5; i++) {
+    const d = document.createElement("i");
+    if (i <= level) d.classList.add("filled");
+    holder.appendChild(d);
+  }
+});
+
+// Reveal-on-scroll
+const revealables = document.querySelectorAll(".reveal, .skill");
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("revealed");
+          io.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+  );
+  revealables.forEach((el) => io.observe(el));
+} else {
+  revealables.forEach((el) => el.classList.add("revealed"));
+}
+
+// Scrollspy — highlight the nav tab for the section in view
+const sections = document.querySelectorAll("main section[id]");
+const navAnchors = document.querySelectorAll('.nav-links a[href^="#"]');
+if ("IntersectionObserver" in window && sections.length) {
+  const spy = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          navAnchors.forEach((a) =>
+            a.classList.toggle("active", a.getAttribute("href") === `#${e.target.id}`)
+          );
+        }
+      });
+    },
+    { rootMargin: "-40% 0px -55% 0px" }
+  );
+  sections.forEach((s) => spy.observe(s));
+}
+
+// Share buttons — build real share intents from the page's own URL
+document.querySelectorAll(".share-btn[data-network]").forEach((btn) => {
+  const url = encodeURIComponent(window.location.href);
+  const title = encodeURIComponent(document.title);
+  const map = {
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+  };
+  const href = map[btn.dataset.network];
+  if (href) btn.setAttribute("href", href);
+});
+
+// ===== Giscus comments (real comments via GitHub Discussions) =====
+// After following the Giscus steps in SETUP-GUIDE.md, fill in these
+// three values from giscus.app — that's the only edit needed.
+const GISCUS = {
+  repo: "",        // e.g. "anirudhamp/thatdatageek"
+  repoId: "",      // from giscus.app
+  categoryId: "",  // from giscus.app (category: Announcements or General)
+};
+
+const giscusHolder = document.querySelector(".giscus");
+if (giscusHolder) {
+  if (GISCUS.repo && GISCUS.repoId && GISCUS.categoryId) {
+    const gs = document.createElement("script");
+    gs.src = "https://giscus.app/client.js";
+    gs.async = true;
+    gs.crossOrigin = "anonymous";
+    Object.entries({
+      "data-repo": GISCUS.repo,
+      "data-repo-id": GISCUS.repoId,
+      "data-category": "Announcements",
+      "data-category-id": GISCUS.categoryId,
+      "data-mapping": "pathname",
+      "data-strict": "0",
+      "data-reactions-enabled": "1",
+      "data-emit-metadata": "0",
+      "data-input-position": "top",
+      "data-theme": "light",
+      "data-lang": "en",
+    }).forEach(([k, v]) => gs.setAttribute(k, v));
+    giscusHolder.appendChild(gs);
+  } else {
+    // Not configured yet — hide the section so nothing looks broken
+    const sec = document.getElementById("comments");
+    if (sec) sec.style.display = "none";
+  }
+}

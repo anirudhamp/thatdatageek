@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Math Behind A/B Testing — Anirudh Prabhu</title>
+  <meta name="description" content="A/B testing takes two variations of a feature and lets statistics decide which one truly wins — hypothesis testing, z-scores and a real case study.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="nav scrolled">
+    <nav class="nav-inner">
+      <a href="../index.html" class="nav-brand">
+        <svg class="nav-diamond" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg>
+        <span>Anirudh&nbsp;Prabhu</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html#blog">← All posts</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="post-page">
+    <article class="post-container">
+      <a class="post-back" href="../index.html#blog">← Back to blog</a>
+      <h1>The Math Behind A/B Testing</h1>
+      <span class="post-meta mono">Anirudh Prabhu · Oct 27, 2020 · 5 min read <em class="post-updated">· Updated: Nov 22, 2020</em></span>
+      <img class="post-hero" src="../assets/blog/ab-hero.jpg" alt="Chalkboard covered in statistical formulas">
+
+      <div class="post-content">
+        <p>A/B testing takes two variations of a feature or promotion and distributes each version to unique groups, collecting measurements for each variation and providing measurable evidence that enables a developer to know which variation is more successful. The original state of a feature or promotion is known as the Control variation (commonly referred to as Variation A), and the new state is known as the Test variation (commonly referred to as Variation B).</p>
+
+        <p>A/B testing uses statistical methods to determine whether results from a Test variation and a Control variation are different. It does this by simultaneously measuring the effect of the Control and Test variations applied to a randomly selected subset of all app users that fall into unique groups (called the Control group and the Test group).</p>
+
+        <img class="post-fig" src="../assets/blog/ab-infographic.png" alt="Infographic: the building blocks of A/B testing — mean, variance, sampling — and hypothesis testing concepts" loading="lazy" onerror="this.style.display='none'">
+
+        <h2>Case study: Landing Page Subscription Rate for my Blog</h2>
+        <p>Let us focus on a simple and common A/B testing example. The scenario is, for all visitors visiting my blog, how many actually subscribe and sign-up for it. We want to test different layouts or designs in order to maximize the percentage of readers who sign up on it. This percentage is known in the online marketing world as the <em>conversion rate</em>, the rate at which you convert users from visitors to subscribers.</p>
+
+        <p>Let's suppose we (randomly or with some kind of criteria) split our users who come by our website into four groups. For the purpose of this experiment let's just call them control group, A, B and C.</p>
+
+        <h2>Data collected</h2>
+        <p>So let's say my blog starts attracting visitors continuously. I've analyzed my blog designs and have realized that the most important thing we need to improve right now is the conversion rate (subscriptions) at the landing page. Now, let us work together on this and solve this!</p>
+        <p>To do this, we will put ourselves a threshold regarding the minimum acceptable conversion rate. Let's suppose we want a conversion rate equal or higher than 20% (1 in 5 visitors should subscribe) — this way we'll only have to focus on those groups who have a value greater or equal than this one.</p>
+        <p>We can create an A/B test with the four groups: control, A, B, and C. Let's suppose we have some data like the following:</p>
+
+        <table class="post-table">
+          <caption class="mono">thatdatageek.com/blog — landing page</caption>
+          <thead>
+            <tr><th>Group</th><th>Visitors</th><th>Registers</th><th>Conversion rate</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Control</td><td>360</td><td>70</td><td>19.6%</td></tr>
+            <tr><td>Treatment A</td><td>355</td><td>85</td><td>23.9%</td></tr>
+            <tr><td>Treatment B</td><td>370</td><td>50</td><td>13.5%</td></tr>
+            <tr><td>Treatment C</td><td>365</td><td>95</td><td>26.1%</td></tr>
+          </tbody>
+        </table>
+
+        <p>From the above data, we see that both groups A and C show conversion (or subscription, in our example) rates higher than 20%, which is our expectation threshold and was our initial goal. As Group C has the highest CVR of all the different groups, we can think that this group is <em>good enough</em>, choose it as the main design for my blog and finalize it.</p>
+
+        <p>BUTTTTTTT — how likely are we to see a result in Treatment C that occurred by random chance or was caused by the natural variation in our data? Are we sure that each time, C would perform the best? What if instead of around 365 visitors, we only had 10 or 20 visitors treated? Would we still be so confident to decide which one is the best choice? This is where we can call upon our friend, Statistics, and perform some hypothesis testing.</p>
+
+        <p>The process of A/B testing is just a glorified hypothesis test. This test is a way for us to judge if our results are meaningful. We perform a hypothesis test to determine if we have sufficient evidence to say our Variation is probably better than the Control. We start the test with the assumption that the Control is better until we have enough evidence to suggest otherwise.</p>
+
+        <p>In the statistics world, it's impossible to say something with 100% confidence (in fact, if we wanted to, it would take us infinite time — more time than our lives or even more time than the Internet has been running). So when talking about confidence intervals, we'll be using a 95% confidence interval, which is usually good enough for our purposes. <strong>Hypothesis testing</strong> is always about validating our confidence, so let's get to it.</p>
+
+        <h2>Statistics come to our help!</h2>
+        <p>When we do hypothesis testing, we need to start with a null hypothesis we want to check out. In this case, the <strong>null hypothesis</strong> will be that the subscription rate of the control group is no less than the subscription rate of our experimental groups. Mathematically this is modelled by:</p>
+        <p class="formula mono">H<sub>0</sub> : p<sub>x</sub> − p ≤ 0</p>
+        <p>Where <strong>p</strong> is the subscription (or conversion) rate of our control group and <strong>p<sub>x</sub></strong> is the subscription rate of one of our experiments (where <strong>x</strong> takes the values A, B or C).</p>
+
+        <p>The <strong>alternative hypothesis</strong> is therefore that the experimental page has a <em>higher</em> subscription rate than the control group:</p>
+        <p class="formula mono">H<sub>1</sub> : p<sub>x</sub> − p &gt; 0</p>
+        <p>This is what we want to see and quantify right now.</p>
+
+        <p>When working with this kind of experiment, the sampled subscription rates are all normally distributed random variables. It's just like the classic statistics example of coin flipping, except that instead of the events <em>heads</em> and <em>tails</em> as the possible results of the experiment, we have the events <em>convert</em> and <em>doesn't convert</em>. The main task now is to see if the experimental group deviates too far from the control treatment in order to get a valid result.</p>
+
+        <p>Here's an example representation of the distribution of the control conversion rate and the treatment conversion rate.</p>
+        <img class="post-fig" src="../assets/blog/ab-distributions.png" alt="Two overlapping normal distribution curves labelled control and treatment" loading="lazy" onerror="this.style.display='none'">
+
+        <p>The maximum peak of each curve is the subscription rate we measure, and the width of the curve tells us how sparse the data is. What we're looking to do is measure the difference between both curves, in order to compare the difference between the two subscription rates and see if that difference is large enough. If we are sure about this fact, we'll be able to conclude that the treatment applied to our blog visitors really has affected (positively or negatively) our users' behavior.</p>
+        <p>In order to do this, let's define a new random variable and call it <strong>X</strong>:</p>
+        <p class="formula mono">X = p<sub>x</sub> − p</p>
+        <p>For each <strong>x</strong> in our different treatments (aka A, B and C), the null hypothesis which we want to prove or discard becomes <strong>X ≤ 0</strong>. We can now use the same techniques from the classic coin-flip exercise, but using the random variable X to give some conclusions based on the data in our previous table. But since the events don't have 50/50 chances of happening like in the coin-flip experiment, we need to know the probability distribution of X.</p>
+
+        <p>There is a theorem that says that the sum (or difference) of two normally distributed random variables is itself normally distributed — you can find the proof of this classical theorem of mathematics on Wikipedia. So finally, this gives us a way to calculate a 95% confidence interval.</p>
+
+        <h2>Z-scores and One-tailed Tests</h2>
+        <p>We can mathematically define the <em>z-score</em> for X like:</p>
+        <p class="formula mono">z = (p<sub>x</sub> − p) / √( p<sub>x</sub>(1−p<sub>x</sub>)/N<sub>x</sub> + p(1−p)/N ) ,&nbsp;&nbsp; x ∈ {A, B, C}</p>
+        <p>where <strong>N</strong> is the sample size of the control group and <strong>N<sub>x</sub></strong> is the sample size of each of the treatment groups. This is due to the fact that the mean of X (the top part of the ratio) is p<sub>x</sub> − p, and the variance of the distribution (whose square root becomes the second part of the ratio) is the sum of the variances of p and p<sub>x</sub> respectively.</p>
+
+        <p>We only have to <strong>reject the null hypothesis if the experimental subscription rate is significantly higher than the control subscription rate.</strong></p>
+        <img class="post-fig" src="../assets/blog/ab-one-tailed.png" alt="Normal distribution with the right tail shaded beyond z = 1.645, illustrating a one-tailed test" loading="lazy" onerror="this.style.display='none'">
+
+        <p>In other words, we can reject the null hypothesis with 95% confidence if the z-score is higher than 1.64. Here is the table with the z-scores calculated using the formula above, so we have a better idea of the performance of each one of the treatments:</p>
+
+        <table class="post-table">
+          <caption class="mono">thatdatageek.com/blog — landing page</caption>
+          <thead>
+            <tr><th>Group</th><th>Visitors</th><th>Registers</th><th>Conversion rate</th><th>Z-score</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Control</td><td>360</td><td>70</td><td>19.6%</td><td>—</td></tr>
+            <tr><td>Treatment A</td><td>355</td><td>85</td><td>23.9%</td><td>1.48</td></tr>
+            <tr><td>Treatment B</td><td>370</td><td>50</td><td>13.5%</td><td>−1.76</td></tr>
+            <tr><td>Treatment C</td><td>365</td><td>95</td><td>26.1%</td><td><strong>3.79</strong></td></tr>
+          </tbody>
+        </table>
+
+        <h2>Conclusion</h2>
+        <p>From the above table, we can finally draw some conclusions and see that:</p>
+        <p>Treatment C has outperformed our control treatment without any doubt, with the highest z-score of all — well above 1.64. Treatment A has little statistical significance, but it's irrelevant at this point because we see the performance of Treatment C; it also wouldn't be significant enough because its value is lower than 1.64. Treatment B even has a negative z-score, so we can discard it without much trouble.</p>
+
+        <p class="post-tags mono">#abtesting&nbsp;&nbsp;#hypothesistesting&nbsp;&nbsp;#datascience</p>
+      </div>
+
+      <div class="engage-bar">        <span class="share-label mono" style="margin-left:0">Share this post:</span>
+        <div class="share-row">
+          <a class="share-btn" data-network="facebook" href="#" target="_blank" rel="noopener" aria-label="Share on Facebook">
+            <svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.6-1.6h1.7V4.2c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.4V14h2.7v8h3.4z"/></svg>
+          </a>
+          <a class="share-btn" data-network="twitter" href="#" target="_blank" rel="noopener" aria-label="Share on X (Twitter)">
+            <svg viewBox="0 0 24 24"><path d="M17.5 3h3.1l-6.8 7.8L21.8 21h-6.3l-4.9-6.4L5 21H1.9l7.3-8.3L2.2 3h6.4l4.4 5.9L17.5 3zm-1.1 16.2h1.7L6.9 4.7H5.1l11.3 14.5z"/></svg>
+          </a>
+          <a class="share-btn" data-network="linkedin" href="#" target="_blank" rel="noopener" aria-label="Share on LinkedIn">
+            <svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.24 8.31h4.52V23H.24V8.31zM8.34 8.31h4.33v2h.06c.6-1.14 2.08-2.34 4.28-2.34 4.58 0 5.42 3.01 5.42 6.92V23h-4.51v-7.13c0-1.7-.03-3.89-2.37-3.89-2.37 0-2.73 1.85-2.73 3.76V23H8.34V8.31z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <section class="comments" id="comments">
+        <h2 class="comments-title">Comments</h2>
+        <div class="giscus"></div>
+        <p class="comments-note mono">Sign in with GitHub to join the discussion.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>◆ © <span id="year"></span> Anirudh Prabhu</span>
+      <a href="../index.html">Home</a>
+    </div>
+  </footer>
+  <script src="../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integrating MySQL with Hadoop — Anirudh Prabhu</title>
+  <meta name="description" content="Why distribute relational data to a cluster — and how to bridge MySQL with the Hadoop ecosystem using Sqoop and Hive.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="nav scrolled">
+    <nav class="nav-inner">
+      <a href="../index.html" class="nav-brand">
+        <svg class="nav-diamond" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg>
+        <span>Anirudh&nbsp;Prabhu</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html#blog">← All posts</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="post-page">
+    <article class="post-container">
+      <a class="post-back" href="../index.html#blog">← Back to blog</a>
+      <h1>Integrating MySQL with Hadoop</h1>
+      <span class="post-meta mono">Anirudh Prabhu · Aug 8, 2019 · 3 min read <em class="post-updated">· Updated: Nov 22, 2020</em></span>
+      <img class="post-hero" src="../assets/blog/hadoop-hero.png" alt="Diagram of data flowing from a MySQL database through Sqoop into Hadoop">
+
+      <div class="post-content">
+        <p>Think of this scenario: imagine you have an actual relational database (RDBMS), and you want to distribute this data to a cluster.</p>
+        <p>Why would you do this? Or rather, why would you ever need this? Because an RDBMS (for example MySQL) is monolithic in nature. So we can perform OLTP transactions but not OLAP. Hadoop (Hive), on the other hand, works for OLAP but not for OLTP.</p>
+        <p>The conventional, simplest and most straightforward way to do this is to dump the information from the database into a CSV file and then manually load that into Hadoop.</p>
+        <p>But it can be done in a much more efficient way using a map-reduce tool called <strong>Sqoop</strong>. Sqoop can help export data from MySQL to Hadoop so that you can run complex queries on it — or vice versa.</p>
+
+        <p class="pullquote">Sqoop is basically a map-reduce job in the back end.</p>
+
+        <p>The Sqoop import is just a single line of code on the command line: the import tool will extract the individual records from an RDBMS and copy them to HDFS. We can also set the number of mappers we want to use in the import syntax with the <code>-m</code> parameter at the end.</p>
+        <img class="post-fig" src="../assets/blog/sqoop-mappers.png" alt="Diagram: mappers reading from MySQL in parallel and writing into HDFS" loading="lazy" onerror="this.style.display='none'">
+
+<pre class="post-code"><code>Ex. $ sqoop import --driver com.microsoft.jdbc.sqlserver.SQLServerDriver \
+    --connect &lt;connect-string&gt; --username anirudh.prabhu --password : 12345</code></pre>
+
+        <p>Here is how I learned to load data from Sqoop to the data warehouse in Hive on Hadoop.</p>
+        <p><strong>Prerequisite:</strong> a Hadoop environment with Sqoop and Hive installed and working. To speed up the work, I am using the Cloudera Quickstart VM (requires 4&nbsp;GB of RAM) — although you can also work with Hortonworks Data Platform (requires 8&nbsp;GB of RAM). Since my laptop has only 8&nbsp;GB of RAM, I prefer to work with the Cloudera VM image. If you are working with a Cloudera/HDP VM all fired up in VirtualBox, it becomes easier to work since many Hadoop ecosystem packages come pre-installed (MySQL, Oozie, Hadoop, Hive, ZooKeeper, Storm, Kafka, Spark etc.).</p>
+
+        <h2>Code walkthrough</h2>
+        <h3>1. Create a table in MySQL</h3>
+<pre class="post-code"><code>mysql&gt; create table customer(id varchar(3), name varchar(20), age varchar(3),
+salary integer(10));
+Query OK, 0 rows affected (0.09 sec)
+
+mysql&gt; desc customer;
++--------+-------------+------+-----+---------+-------+
+| Field  | Type        | Null | Key | Default | Extra |
++--------+-------------+------+-----+---------+-------+
+| id     | varchar(3)  | YES  |     | NULL    |       |
+| name   | varchar(20) | YES  |     | NULL    |       |
+| age    | varchar(3)  | YES  |     | NULL    |       |
+| salary | int(10)     | YES  |     | NULL    |       |
++--------+-------------+------+-----+---------+-------+
+
+mysql&gt; select * from customer;
++------+--------+------+--------+
+| id   | name   | age  | salary |
++------+--------+------+--------+
+| 1    | John   | 30   |  80000 |
+| 2    | Kevin  | 33   |  84000 |
+| 3    | Mark   | 28   |  90000 |
+| 4    | Jenna  | 34   |  93000 |
+| 5    | Robert | 32   | 100000 |
+| 6    | Zoya   | 40   |  60000 |
+| 7    | Sam    | 37   |  75000 |
+| 8    | George | 31   |  67000 |
+| 9    | Peter  | 23   |  70000 |
+| 19   | Alex   | 26   |  74000 |
++------+--------+------+--------+</code></pre>
+
+        <h3>2. Let's start Sqooping</h3>
+        <p>As you can see, the <strong>customer</strong> table <strong>does not have any primary key</strong>. I have added a few records to the customer table. By default, Sqoop will identify the primary key column (if present) in a table and use it as the splitting column. The low and high values for the splitting column are retrieved from the database, and the map tasks operate on evenly-sized components of the total range.</p>
+        <p>If the actual values for the primary key are not uniformly distributed across its range, this can result in unbalanced tasks. You should explicitly choose a different column with the <code>--split-by</code> argument — for example, <code>--split-by id</code>. Since I want to import this table directly into Hive, I am adding <code>--hive-import</code> to my Sqoop command.</p>
+
+<pre class="post-code"><code>sqoop import --connect jdbc:mysql://localhost:3306/sqoop
+--username root
+-P
+--split-by id
+--columns id,name
+--table customer
+--target-dir /user/cloudera/ingest/raw/customers
+--fields-terminated-by ","
+--hive-import
+--create-hive-table
+--hive-table sqoop_workspace.customers</code></pre>
+
+        <p>Here's what each individual Sqoop command option means. <code>connect</code> provides the JDBC string, and <code>username</code> is the database username. <code>-P</code> will ask for the password in the console — alternatively you can use <code>--password</code>, but this is not good practice as it's visible in your job execution logs and asking for trouble; one way to deal with this is to store the DB password in a file in HDFS and provide it at runtime. <code>table</code> tells Sqoop which table you want to import from MySQL — here it's customer. <code>split-by</code> specifies your splitting column — I am specifying id here. <code>target-dir</code> is the HDFS destination directory. <code>fields-terminated-by</code> — I have specified comma (by default it will import data into HDFS with comma-separated values). <code>hive-import</code> imports the table into Hive (using Hive's default delimiters if none are set). <code>create-hive-table</code> — if set, the job will fail if the Hive table already exists; it works in this case. <code>hive-table</code> specifies <code>&lt;db_name&gt;.&lt;table_name&gt;</code> — here it's sqoop_workspace.customers, where sqoop_workspace is my database and customers is the table name.</p>
+        <p>Sqoop is a map-reduce job. Notice that I am using <code>-P</code> for the password option. While this works, it can easily be parameterized by using <code>--password</code> and reading it from a file.</p>
+
+<pre class="post-code"><code>sqoop import --connect jdbc:mysql://localhost:3306/sqoop --username root -P \
+--split-by id --columns id,name --table customer --target-dir \
+/user/cloudera/ingest/raw/customers --fields-terminated-by "," --hive-import \
+--create-hive-table --hive-table sqoop_workspace.customers</code></pre>
+
+        <p>The above import command will create a table in HDFS by Sqoop using a map-reduce job and will import it into Hive with schema <strong>'sqoop_workspace'</strong> and table name <strong>'customers'</strong>.</p>
+        <p>Now, let us verify our tables with Hive.</p>
+
+<pre class="post-code"><code>hive&gt; show databases;
+OK
+default
+sqoop_workspace
+Time taken: 0.034 seconds, Fetched: 2 row(s)
+hive&gt; use sqoop_workspace;
+OK
+Time taken: 0.063 seconds
+hive&gt; show tables;
+OK
+customers
+Time taken: 0.036 seconds, Fetched: 1 row(s)
+hive&gt; show create table customers;
+OK</code></pre>
+
+        <h3>Next step is to query it in Hive</h3>
+<pre class="post-code"><code>hive&gt; select * from customers;
+OK
+1    John
+2    Kevin
+19   Alex
+3    Mark
+4    Jenna
+5    Robert
+6    Zoya
+7    Sam
+8    George
+9    Peter
+Time taken: 1.123 seconds, Fetched: 10 row(s)</code></pre>
+        <p>Success!</p>
+
+        <p>We can also do incremental imports using Sqoop. We can hold our Hive table in sync with the RDBMS by using a timestamp filter to do incremental imports over time. This allows data to be actively and constantly exchanged between the different database environments over time, ensuring consistency of the shared information and keeping it up to date. Pretty cool stuff, eh!</p>
+
+        <p class="post-tags mono">#sqoop&nbsp;&nbsp;#hadoop&nbsp;&nbsp;#hive&nbsp;&nbsp;#mysql</p>
+      </div>
+
+      <div class="engage-bar">        <span class="share-label mono" style="margin-left:0">Share this post:</span>
+        <div class="share-row">
+          <a class="share-btn" data-network="facebook" href="#" target="_blank" rel="noopener" aria-label="Share on Facebook">
+            <svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.6-1.6h1.7V4.2c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.4V14h2.7v8h3.4z"/></svg>
+          </a>
+          <a class="share-btn" data-network="twitter" href="#" target="_blank" rel="noopener" aria-label="Share on X (Twitter)">
+            <svg viewBox="0 0 24 24"><path d="M17.5 3h3.1l-6.8 7.8L21.8 21h-6.3l-4.9-6.4L5 21H1.9l7.3-8.3L2.2 3h6.4l4.4 5.9L17.5 3zm-1.1 16.2h1.7L6.9 4.7H5.1l11.3 14.5z"/></svg>
+          </a>
+          <a class="share-btn" data-network="linkedin" href="#" target="_blank" rel="noopener" aria-label="Share on LinkedIn">
+            <svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.24 8.31h4.52V23H.24V8.31zM8.34 8.31h4.33v2h.06c.6-1.14 2.08-2.34 4.28-2.34 4.58 0 5.42 3.01 5.42 6.92V23h-4.51v-7.13c0-1.7-.03-3.89-2.37-3.89-2.37 0-2.73 1.85-2.73 3.76V23H8.34V8.31z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <section class="comments" id="comments">
+        <h2 class="comments-title">Comments</h2>
+        <div class="giscus"></div>
+        <p class="comments-note mono">Sign in with GitHub to join the discussion.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>◆ © <span id="year"></span> Anirudh Prabhu</span>
+      <a href="../index.html">Home</a>
+    </div>
+  </footer>
+  <script src="../script.js"></script>
+</body>
+</html>
