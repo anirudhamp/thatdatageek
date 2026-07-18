@@ -4,9 +4,13 @@
 const yearEl = document.getElementById("year");
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-// Nav background border on scroll
+// Nav background on scroll (transparent over dark hero; always solid on pages without one)
 const nav = document.querySelector(".nav");
-const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
+const hasDarkHero = !!document.querySelector(".hero-dark");
+const onScroll = () => {
+  if (!hasDarkHero) { nav.classList.add("scrolled"); return; }
+  nav.classList.toggle("scrolled", window.scrollY > 8);
+};
 window.addEventListener("scroll", onScroll, { passive: true });
 onScroll();
 
@@ -26,16 +30,13 @@ if (toggle && links) {
   );
 }
 
-// Build skill diamonds (5 per row, filled to data-level)
-document.querySelectorAll(".skill").forEach((row) => {
+// Skill bars: fill to data-level (out of 5), loading one after another
+document.querySelectorAll(".skill").forEach((row, i) => {
   const level = parseInt(row.dataset.level || "0", 10);
-  const holder = row.querySelector(".skill-diamonds");
-  if (!holder) return;
-  for (let i = 1; i <= 5; i++) {
-    const d = document.createElement("i");
-    if (i <= level) d.classList.add("filled");
-    holder.appendChild(d);
-  }
+  const fill = row.querySelector(".skill-fill");
+  if (!fill) return;
+  row.style.setProperty("--pct", (level / 5) * 100 + "%");
+  fill.style.transitionDelay = i * 0.16 + "s"; // sequential cascade
 });
 
 // Reveal-on-scroll
@@ -124,4 +125,22 @@ if (giscusHolder) {
     const sec = document.getElementById("comments");
     if (sec) sec.style.display = "none";
   }
+}
+
+
+// Journey timeline: green line draws downward as you scroll through it
+const tl = document.querySelector(".timeline");
+if (tl) {
+  const prog = document.createElement("div");
+  prog.className = "tl-progress";
+  tl.appendChild(prog);
+  const drawLine = () => {
+    const r = tl.getBoundingClientRect();
+    const anchor = window.innerHeight * 0.72; // line tip follows ~3/4 down the viewport
+    const drawn = Math.min(Math.max(anchor - r.top - 12, 0), r.height - 24);
+    prog.style.height = drawn + "px";
+  };
+  window.addEventListener("scroll", drawLine, { passive: true });
+  window.addEventListener("resize", drawLine, { passive: true });
+  drawLine();
 }
