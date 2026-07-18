@@ -144,3 +144,13 @@ if (tl) {
   window.addEventListener("resize", drawLine, { passive: true });
   drawLine();
 }
+
+// Testimonials slider arrows
+const qTrack = document.querySelector(".quote-track");
+if (qTrack) {
+  const step = () => qTrack.clientWidth + 18;
+  const prev = document.querySelector(".q-prev");
+  const next = document.querySelector(".q-next");
+  if (prev) prev.addEventListener("click", () => qTrack.scrollBy({ left: -step(), behavior: "smooth" }));
+  if (next) next.addEventListener("click", () => qTrack.scrollBy({ left: step(), behavior: "smooth" }));
+}
